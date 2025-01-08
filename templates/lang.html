@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Translation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+            height: 100vh;
+            position: relative;
+        }
+        .container {
+            width: 45%;
+            max-width: 600px;
+            margin: 20px;
+        }
+        .translation-section {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .language-select {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown select {
+            background-color: #333;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 20px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .dropdown::after {
+            content: '▼';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: white;
+            font-size: 18px;
+        }
+        .dropdown select option {
+            background-color: #333;
+            color: white;
+        }
+        .flag-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+        .translate-box {
+            background-color: #2D2D2D;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .output-text-container {
+            position: relative;
+        }
+        .output-text {
+            background-color: #2D2D2D;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+        }
+        
+        
+        
+        
+        .translated-text {
+            background-color: #2D2D2D;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, border-radius 0.3s;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .icon:hover {
+            background-color: blue;
+            color: white;
+        }
+        .translate-box textarea {
+            width: calc(100% - 50px);
+            background-color: transparent;
+            border: none;
+            color: white;
+            resize: none;
+            height: 100px;
+            padding-right: 50px;
+        }
+        .translate-box textarea:focus {
+            outline: none;
+        }
+        .translate-button {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .translate-button button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .translate-button button:hover {
+            background-color: blue;
+            color: white;
+        }
+        .clear-icon {
+            position: absolute;
+            right: 55px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, border-radius 0.3s;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #333;
+            color: white;
+        }
+        .clear-icon:hover {
+            background-color: blue;
+        }
+        .history-section {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .history-section ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .history-section li {
+            background-color: #2D2D2D;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        
+        .history-section li:hover {
+            background-color: #333;
+            transform: scale(1.02);
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item .input-text {
+            font-weight: bold;
+        }
+        
+        .history-item .translated-text {
+            color: #bbb;
+        }
+        
+        .timestamp {
+            color: #888;
+            font-size: 12px;
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .no-history {
+            color: #aaa;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .clear-history-button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .clear-history-button:hover {
+            background-color: blue;
+            color: white;
+        }
+        
+        .swap-icon {
+            cursor: pointer;
+            font-size: 24px;
+            margin: 10px;
+        }
+        .swap-icon:hover {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    
+   
+    <div class="container">
+        
+        <div class="header">Text Translation</div>
+        <form id="translation-form" action="{% url 'translate' %}" method="post">
+            {% csrf_token %}
+        
+                <div class="translation-section">
+                    <div class="language-select">
+                        <div class="dropdown">
+                            <select id="from-language" onchange="updateFlag(this)" name="from_language">
+                                <option value="en" data-flag="https://flagcdn.com/w40/us.png">English</option>
+                                <option value="te" data-flag="https://flagcdn.com/w40/in.png">Telugu</option>
+                                <option value="hi" data-flag="https://flagcdn.com/w40/in.png">Hindi</option>
+                                <option value="bn" data-flag="https://flagcdn.com/w40/in.png">Bengali</option>
+                                <option value="mr" data-flag="https://flagcdn.com/w40/in.png">Marathi</option>
+                                <option value="ta" data-flag="https://flagcdn.com/w40/in.png">Tamil</option>
+                                <option value="gu" data-flag="https://flagcdn.com/w40/in.png">Gujarati</option>
+                                <option value="kn" data-flag="https://flagcdn.com/w40/in.png">Kannada</option>
+                                <option value="ml" data-flag="https://flagcdn.com/w40/in.png">Malayalam</option>
+                                <option value="pa" data-flag="https://flagcdn.com/w40/in.png">Punjabi</option>
+                                <option value="es" data-flag="https://flagcdn.com/w40/es.png">Spanish</option>
+                                <option value="fr" data-flag="https://flagcdn.com/w40/fr.png">French</option>
+                                <option value="de" data-flag="https://flagcdn.com/w40/de.png">German</option>
+                                <option value="ja" data-flag="https://flagcdn.com/w40/jp.png">Japanese</option>
+                                <option value="ko" data-flag="https://flagcdn.com/w40/kr.png">Korean</option>
+                                <option value="ru" data-flag="https://flagcdn.com/w40/ru.png">Russian</option>
+                                <option value="ar" data-flag="https://flagcdn.com/w40/ae.png">Arabic</option>
+                                <option value="pt" data-flag="https://flagcdn.com/w40/br.png">Portuguese</option>
+                                <option value="it" data-flag="https://flagcdn.com/w40/it.png">Italian</option>
+                                <option value="nl" data-flag="https://flagcdn.com/w40/nl.png">Dutch</option>
+                                <option value="sv" data-flag="https://flagcdn.com/w40/se.png">Swedish</option>
+                                <option value="no" data-flag="https://flagcdn.com/w40/no.png">Norwegian</option>
+                                <option value="da" data-flag="https://flagcdn.com/w40/dk.png">Danish</option>
+                                <option value="fi" data-flag="https://flagcdn.com/w40/fi.png">Finnish</option>
+                                <option value="tr" data-flag="https://flagcdn.com/w40/tr.png">Turkish</option>
+                                <option value="el" data-flag="https://flagcdn.com/w40/gr.png">Greek</option>
+                                <option value="pl" data-flag="https://flagcdn.com/w40/pl.png">Polish</option>
+                                <option value="th" data-flag="https://flagcdn.com/w40/th.png">Thai</option>
+                                <option value="vi" data-flag="https://flagcdn.com/w40/vn.png">Vietnamese</option>
+                                <option value="zh-CN" data-flag="https://flagcdn.com/w40/cn.png">Simplified Chinese</option>
+                                <option value="es-MX" data-flag="https://flagcdn.com/w40/mx.png">Mexican Spanish</option>
+                                <option value="pt-BR" data-flag="https://flagcdn.com/w40/br.png">Brazilian Portuguese</option>
+                                <option value="ru-RU" data-flag="https://flagcdn.com/w40/ru.png">Russian (Russia)</option>
+                                <option value="ja-JP" data-flag="https://flagcdn.com/w40/jp.png">Japanese (Japan)</option>
+                                <option value="de-DE" data-flag="https://flagcdn.com/w40/de.png">German (Germany)</option>
+                                <option value="fr-FR" data-flag="https://flagcdn.com/w40/fr.png">French (France)</option>
+                                <option value="es-ES" data-flag="https://flagcdn.com/w40/es.png">Spanish (Spain)</option>
+                                <option value="ko-KR" data-flag="https://flagcdn.com/w40/kr.png">Korean (South Korea)</option>
+
+                                <!-- Add more languages as needed -->
+                            </select>
+                        </div>
+                        <div class="swap-icon" onclick="swapLanguages()">
+                            🔄
+                        </div>
+                            <div class="dropdown">
+                                <select id="to-language" onchange="updateFlag(this)" name="to_language">
+                                    <option value="te" data-flag="https://flagcdn.com/w40/in.png">Telugu</option>
+                                    <option value="en" data-flag="https://flagcdn.com/w40/us.png">English</option>
+                                    <option value="hi" data-flag="https://flagcdn.com/w40/in.png">Hindi</option>
+                                    <option value="bn" data-flag="https://flagcdn.com/w40/in.png">Bengali</option>
+                                    <option value="mr" data-flag="https://flagcdn.com/w40/in.png">Marathi</option>
+                                    <option value="ta" data-flag="https://flagcdn.com/w40/in.png">Tamil</option>
+                                    <option value="gu" data-flag="https://flagcdn.com/w40/in.png">Gujarati</option>
+                                    <option value="kn" data-flag="https://flagcdn.com/w40/in.png">Kannada</option>
+                                    <option value="ml" data-flag="https://flagcdn.com/w40/in.png">Malayalam</option>
+                                    <option value="pa" data-flag="https://flagcdn.com/w40/in.png">Punjabi</option>
+                                    <option value="es" data-flag="https://flagcdn.com/w40/es.png">Spanish</option>
+                                    <option value="fr" data-flag="https://flagcdn.com/w40/fr.png">French</option>
+                                    <option value="de" data-flag="https://flagcdn.com/w40/de.png">German</option>
+                                    <option value="ja" data-flag="https://flagcdn.com/w40/jp.png">Japanese</option>
+                                    <option value="ko" data-flag="https://flagcdn.com/w40/kr.png">Korean</option>
+                                    <option value="ru" data-flag="https://flagcdn.com/w40/ru.png">Russian</option>
+                                    <option value="ar" data-flag="https://flagcdn.com/w40/ae.png">Arabic</option>
+                                    <option value="pt" data-flag="https://flagcdn.com/w40/br.png">Portuguese</option>
+                                    <option value="it" data-flag="https://flagcdn.com/w40/it.png">Italian</option>
+                                    <option value="nl" data-flag="https://flagcdn.com/w40/nl.png">Dutch</option>
+                                    <option value="sv" data-flag="https://flagcdn.com/w40/se.png">Swedish</option>
+                                    <option value="no" data-flag="https://flagcdn.com/w40/no.png">Norwegian</option>
+                                    <option value="da" data-flag="https://flagcdn.com/w40/dk.png">Danish</option>
+                                    <option value="fi" data-flag="https://flagcdn.com/w40/fi.png">Finnish</option>
+                                    <option value="tr" data-flag="https://flagcdn.com/w40/tr.png">Turkish</option>
+                                    <option value="el" data-flag="https://flagcdn.com/w40/gr.png">Greek</option>
+                                    <option value="pl" data-flag="https://flagcdn.com/w40/pl.png">Polish</option>
+                                    <option value="th" data-flag="https://flagcdn.com/w40/th.png">Thai</option>
+                                    <option value="vi" data-flag="https://flagcdn.com/w40/vn.png">Vietnamese</option>
+                                    <option value="zh-CN" data-flag="https://flagcdn.com/w40/cn.png">Simplified Chinese</option>
+                                    <option value="es-MX" data-flag="https://flagcdn.com/w40/mx.png">Mexican Spanish</option>
+                                    <option value="pt-BR" data-flag="https://flagcdn.com/w40/br.png">Brazilian Portuguese</option>
+                                    <option value="ru-RU" data-flag="https://flagcdn.com/w40/ru.png">Russian (Russia)</option>
+                                    <option value="ja-JP" data-flag="https://flagcdn.com/w40/jp.png">Japanese (Japan)</option>
+                                    <option value="de-DE" data-flag="https://flagcdn.com/w40/de.png">German (Germany)</option>
+                                    <option value="fr-FR" data-flag="https://flagcdn.com/w40/fr.png">French (France)</option>
+                                    <option value="es-ES" data-flag="https://flagcdn.com/w40/es.png">Spanish (Spain)</option>
+                                    <option value="ko-KR" data-flag="https://flagcdn.com/w40/kr.png">Korean (South Korea)</option>
+
+                                    <!-- Add more languages as needed -->
+                                </select>
+                            </div>
+                    </div>
+                        <div class="translate-box">
+                            <textarea id="input-text" name="input_text" placeholder="Enter text to Translate....">{{ input_text }}</textarea>
+                            <div class="icon" onclick="startDictation()">
+                                🎤
+                            </div>
+                            
+                            <div class="clear-icon" onclick="clearText()">
+                                ✖
+                            </div>
+                            <div class="translate-button">
+                                <button type="submit">Translate</button>
+                            </div>
+                        </div>
+                
+                        
+                    </div>
+        </form>
+            
+        <div class="translate-box">
+            <div class="output-text-container">
+                <div class="output-text" id="output-text">
+                    {% if translated_text %}
+                        <span class="translated-text">{{ translated_text }}</span>
+                        
+
+                    
+                    {% endif %}
+                    <div class="icon" onclick="speakText()">
+                        🔊
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="history-section">
+            <a href="/delete_old_messages/"><button class="clear-history-button">Clear History</button></a>
+            <h2>Translation History</h2>
+            <div id="history-list">
+                <!-- History items will be appended here -->
+                {% if history %}
+                <ul>
+                    {% for entry in history %}
+                        <li>{{ entry.input_text }} → {{ entry.translated_text }} ({{ entry.from_language }} to {{ entry.to_language }})</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No translation history available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+
+    
+
+    <script>
+        function updateFlag(selectElement) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const flagUrl = selectedOption.getAttribute('data-flag');
+            selectElement.style.backgroundImage = `url(${flagUrl})`;
+            selectElement.style.backgroundSize = '24px 24px';
+            selectElement.style.backgroundRepeat = 'no-repeat';
+            selectElement.style.backgroundPosition = '10px center';
+            selectElement.style.paddingLeft = '40px';
+        }
+
+        document.querySelectorAll('select').forEach(select => updateFlag(select));
+
+        function startDictation() {
+            if (window.hasOwnProperty('webkitSpeechRecognition')) {
+                const recognition = new webkitSpeechRecognition();
+
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.lang = "en-US";
+                recognition.start();
+
+                recognition.onresult = function(event) {
+                    document.getElementById('input-text').value = event.results[0][0].transcript;
+                    recognition.stop();
+                };
+
+                recognition.onerror = function(event) {
+                    recognition.stop();
+                }
+            }
+        }
+
+        function speakText() {
+
+            
+            const text = document.getElementById('output-text').textContent || document.getElementById('output-text').innerText;
+            const outLang = "{{ out_language }}";
+            if (text.trim() !== '') {
+                const msg = new SpeechSynthesisUtterance();
+                msg.text = text;
+                msg.lang = outLang ? outLang :'en-US'; // Set this to the appropriate language code if needed
+                window.speechSynthesis.speak(msg);
+            }
+        }
+        
+       
+
+       
+        function swapLanguages() {
+    const fromSelect = document.getElementById('from-language');
+    const toSelect = document.getElementById('to-language');
+
+    // Swap the values of the two select elements
+    const tempValue = fromSelect.value;
+    fromSelect.value = toSelect.value;
+    toSelect.value = tempValue;
+
+    // Update the flag images for the select elements
+    updateFlag(fromSelect);
+    updateFlag(toSelect);
+}
+function clearText() {
+    document.getElementById('input-text').value = '';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Example input and output language codes (replace with actual values)
+    const inputLanguageCode = "{{ in_language|default:'en' }}"; // Default to 'en' if not provided
+    const outputLanguageCode = "{{ out_language|default:'te' }}"; // Default to 'te' if not provided
+
+    // Function to set selected value in a dropdown and update the flag
+    function setDropdownValue(selectElement, value) {
+        const option = Array.from(selectElement.options).find(option => option.value === value);
+        if (option) {
+            selectElement.value = value;
+            updateFlag(selectElement);
+        }
+    }
+
+    // Function to update the flag image for a dropdown
+    function updateFlag(selectElement) {
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const flagUrl = selectedOption.getAttribute('data-flag');
+        selectElement.style.backgroundImage = `url(${flagUrl})`;
+        selectElement.style.backgroundSize = '24px 24px';
+        selectElement.style.backgroundRepeat = 'no-repeat';
+        selectElement.style.backgroundPosition = '10px center';
+        selectElement.style.paddingLeft = '40px';
+    }
+
+    // Get dropdown elements
+    const fromSelect = document.getElementById('from-language');
+    const toSelect = document.getElementById('to-language');
+
+    // Set the selected values and update the flags
+    setDropdownValue(fromSelect, inputLanguageCode);
+    setDropdownValue(toSelect, outputLanguageCode);
+
+    // Add change event listeners to update flags when the selection changes
+    fromSelect.addEventListener('change', function() {
+        updateFlag(fromSelect);
+    });
+
+    toSelect.addEventListener('change', function() {
+        updateFlag(toSelect);
+    });
+});
+
+
+
+    </script>
+</body>
+</html>
